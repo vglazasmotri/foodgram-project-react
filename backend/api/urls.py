@@ -1,10 +1,11 @@
-from django.urls import include, path
 from rest_framework import routers
+from django.urls import include, path
 
-from api.views import index, CustomUserViewSet
+from api.views import index, CustomUserViewSet, TagViewSet
 
 router = routers.DefaultRouter()
 router.register('users', CustomUserViewSet)
+router.register('tags', TagViewSet)
 
 urlpatterns = [
     path('index/', index),
