@@ -20,3 +20,9 @@ class TagViewSet(ModelViewSet):
 class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
+
+    def get_queryset(self):
+        recipes = Recipe.objects.prefetch_related(
+            'recipeingredient_set__ingredient', 'tags'
+        ).all()
+        return recipes
