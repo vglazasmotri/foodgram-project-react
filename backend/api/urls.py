@@ -4,13 +4,14 @@ from django.urls import include, path
 from api.views import index, CustomUserViewSet, TagViewSet, RecipeViewSet
 
 router = routers.DefaultRouter()
-router.register('users', CustomUserViewSet)
+# router.register('users', CustomUserViewSet)
 router.register('tags', TagViewSet)
 router.register('recipes', RecipeViewSet)
+router.register('users', CustomUserViewSet)
 
 urlpatterns = [
     path('index/', index),
-    # path('/', include('djoser.urls')),
-    path('auth/', include('djoser.urls.authtoken')),
     path('', include(router.urls)),
+    path('', include('djoser.urls')),
+    path('auth/', include('djoser.urls.authtoken')),
 ]
