@@ -79,7 +79,6 @@ class CustomUserSerializer(UserSerializer):
         return Follow.objects.filter(user=user, author=obj.id).exists()
 
 # Создание
-
 class CustomCreateUserSerializer(UserCreateSerializer):
     """Регистация нового пользователя."""
 
@@ -94,8 +93,8 @@ class CustomCreateUserSerializer(UserCreateSerializer):
 # Сериализаторы Ингредиент-Рецепт
 #
 #
-# Чтение
 
+# Чтение
 class RecipeIngredientSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
@@ -112,7 +111,6 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 # Сериализаторы Рецепта
 #
 #
-
 
 # Чтение
 class RecipeSerializer(serializers.ModelSerializer):
@@ -163,9 +161,13 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         fields = ('name', 'cooking_time', 'text', 'tags')
 
 
-
+#
+#
+# Сериализаторы Подписок
+#
+#
 class SubscriptionSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели Follow."""
+    """Сериализатор для модели Подписок."""
 
     class Meta:
         model = Follow
@@ -187,7 +189,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionRecipeShortSerializer(serializers.ModelSerializer):
-    """Сериализатор для отображения рецептов в подписке."""
+    """Список рецептов в подписке."""
 
     class Meta:
         model = Recipe
@@ -198,7 +200,7 @@ class SubscriptionRecipeShortSerializer(serializers.ModelSerializer):
         )
 
 class SubscriptionShowSerializer(CustomUserSerializer):
-    """Сериализатор отображения подписок."""
+    """Список подписок."""
 
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
