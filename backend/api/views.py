@@ -7,10 +7,11 @@ from rest_framework.decorators import action
 
 from rest_framework.pagination import PageNumberPagination
 
-from recipes.models import Tag, Recipe, Ingredient, Follow
+from recipes.models import Tag, Recipe, Ingredient, Follow, Favorite
 from api.serializers import (
-    IngredientSerializer, TagSerializer, RecipeSerializer, RecipeCreateSerializer, 
-    CustomUserSerializer, SubscriptionSerializer, SubscriptionShowSerializer
+    IngredientSerializer, TagSerializer, RecipeSerializer,
+    CustomUserSerializer, SubscriptionSerializer, SubscriptionShowSerializer,
+    FavoriteSerializer, RecipeShortSerializer
     )
 
 from users.models import User
@@ -78,6 +79,32 @@ class TagViewSet(ModelViewSet):
 class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
+
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        url_path='favorite',
+        url_name='favorite',
+        permission_classes=(permissions.IsAuthenticated,)
+    )
+    def get_favorite(self, request, pk):
+        """Позволяет текущему пользователю добавлять рецепты в избранное."""
+        recipe = get_object_or_404(Recipe, pk=pk)
+        if request.method == 'POST':
+            serializer = FavoriteSerializer(
+                data={'user': request.user.id, 'recipe': recipe.id}
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            favorite_serializer = RecipeShortSerializer(recipe)
+            return Response(
+                favorite_serializer.data, status=status.HTTP_201_CREATED
+            )
+        favorite_recipe = get_object_or_404(
+            Favorite, user=request.user, recipe=recipe
+        )
+        favorite_recipe.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def get_queryset(self):
         recipes = Recipe.objects.prefetch_related(

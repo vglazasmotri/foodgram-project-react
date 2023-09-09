@@ -23,10 +23,18 @@ class CartSerializer(serializers.ModelSerializer):
 #
 #
 class FavoriteSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели Favorite."""
 
     class Meta:
         model = Favorite
         fields = '__all__'
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Favorite.objects.all(),
+                fields=('user', 'recipe'),
+                message='Этот рецепт уже в избраном.'
+            )
+        ]
 
 
 #
@@ -113,6 +121,16 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 #
 
 # Чтение
+class RecipeShortSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Recipe
+        fields = (
+            'id',
+            'name',
+            'cooking_time'
+        )
+
 class RecipeSerializer(serializers.ModelSerializer):
     author = CustomUserSerializer()
     tags = TagSerializer(many=True)
@@ -188,17 +206,6 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         return data
 
 
-class SubscriptionRecipeShortSerializer(serializers.ModelSerializer):
-    """Список рецептов в подписке."""
-
-    class Meta:
-        model = Recipe
-        fields = (
-            'id',
-            'name',
-            'cooking_time'
-        )
-
 class SubscriptionShowSerializer(CustomUserSerializer):
     """Список подписок."""
 
@@ -220,7 +227,7 @@ class SubscriptionShowSerializer(CustomUserSerializer):
 
     def get_recipes(self, object):
         author_recipes = object.recipes.all()[:RECIPES_LIMIT]
-        return SubscriptionRecipeShortSerializer(
+        return RecipeShortSerializer(
             author_recipes, many=True
         ).data
 
