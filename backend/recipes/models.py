@@ -12,6 +12,7 @@ class Tag(models.Model):
     def __str__(self):
         return self.name
 
+
 class Recipe(models.Model):
     name = models.CharField(max_length=200)
     cooking_time = models.PositiveIntegerField()
@@ -33,10 +34,12 @@ class Ingredient(models.Model):
     name = models.CharField(max_length=200)
     measurement_unit = models.CharField(max_length=200)
 
+
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     amount = models.PositiveIntegerField()
+
 
 class Follow(models.Model):
     """Подписка"""
@@ -67,6 +70,7 @@ class Follow(models.Model):
     def __str__(self):
         return f'{self.user} subscribed on {self.author}'
 
+
 class Cart(models.Model):
     """Корзина покупок."""
     user = models.ForeignKey(
@@ -93,6 +97,7 @@ class Cart(models.Model):
 
     def __str__(self):
         return f'{self.user} {self.recipe}'
+
 
 class Favorite(models.Model):
     """Избранное"""

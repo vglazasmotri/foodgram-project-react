@@ -2,7 +2,7 @@ from django.shortcuts import render, HttpResponse, get_object_or_404
 from rest_framework.response import Response
 from rest_framework import permissions, status
 from djoser.views import UserViewSet
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.decorators import action
 
 from rest_framework.pagination import PageNumberPagination
@@ -11,7 +11,7 @@ from recipes.models import Tag, Recipe, Ingredient, Follow, Favorite
 from api.serializers import (
     IngredientSerializer, TagSerializer, RecipeSerializer,
     CustomUserSerializer, SubscriptionSerializer, SubscriptionShowSerializer,
-    FavoriteSerializer, RecipeShortSerializer
+    FavoriteSerializer, RecipeShortSerializer, RecipeCreateSerializer,
     )
 
 from users.models import User
@@ -68,13 +68,15 @@ class CustomUserViewSet(UserViewSet):
         )
         return paginator.get_paginated_response(serializer.data)
     
-class IngredientViewSet(ModelViewSet):
+class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    pagination_class = None
 
-class TagViewSet(ModelViewSet):
+class TagViewSet(ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    pagination_class = None
 
 class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
@@ -112,11 +114,11 @@ class RecipeViewSet(ModelViewSet):
         ).all()
         return recipes
 
-    # def get_serializer(self):
-    #     # Добавить для других типов запросов
-    #     if self.action == 'create':
-    #         return RecipeCreateSerializer
-    #     return RecipeSerializer
+    def get_serializer_class(self):
+        # Добавить для других типов запросов
+        if self.action == 'create':
+            return RecipeCreateSerializer
+        return RecipeSerializer
     
-    # def perform_create(self, serializer):
-    #     serializer.save(author=self.request.user)
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)

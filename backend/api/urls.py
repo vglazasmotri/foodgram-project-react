@@ -6,10 +6,10 @@ from api.views import (
 )
 
 router = routers.DefaultRouter()
-router.register('ingredients', IngredientViewSet)
-router.register('recipes', RecipeViewSet)
-router.register('tags', TagViewSet)
-router.register('users', CustomUserViewSet)
+router.register('ingredients', IngredientViewSet, basename='ingredients')
+router.register('recipes', RecipeViewSet, basename='recipes')
+router.register('tags', TagViewSet, basename='tags')
+router.register('users', CustomUserViewSet, basename='users')
 
 
 

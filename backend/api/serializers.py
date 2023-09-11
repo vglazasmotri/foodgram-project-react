@@ -5,23 +5,15 @@ from users.models import User
 from djoser.serializers import UserCreateSerializer, UserSerializer
 
 RECIPES_LIMIT = 6
-#
-#
+
 # Сериализаторы Список покупок
-#
-#
 class CartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cart
         fields = '__all__'
 
-
-#
-#
 # Сериализаторы Избранное
-#
-#
 class FavoriteSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Favorite."""
 
@@ -36,38 +28,20 @@ class FavoriteSerializer(serializers.ModelSerializer):
             )
         ]
 
-
-#
-#
 # Сериализаторы Ингредиент
-#
-#
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
         fields = '__all__'
 
-
-#
-#
 # Сериализаторы Тега
-#
-#
 class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tag
         fields = '__all__'
 
-
-
-#
-#
-# Сериализаторы Пользователя
-#
-#
-
-# Чтение
+# Сериализаторы Пользователя Чтение
 class CustomUserSerializer(UserSerializer):
     """Получение списка пользователей."""
     is_subscribed = serializers.SerializerMethodField()
@@ -86,7 +60,7 @@ class CustomUserSerializer(UserSerializer):
             return False
         return Follow.objects.filter(user=user, author=obj.id).exists()
 
-# Создание
+# Сериализаторы Пользователя Создание
 class CustomCreateUserSerializer(UserCreateSerializer):
     """Регистация нового пользователя."""
 
@@ -96,13 +70,7 @@ class CustomCreateUserSerializer(UserCreateSerializer):
                   'last_name', 'password')
         extra_kwargs = {'password': {'write_only': True}}
 
-#
-#
-# Сериализаторы Ингредиент-Рецепт
-#
-#
-
-# Чтение
+# Сериализаторы Ингредиент-Рецепт Чтение
 class RecipeIngredientSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
@@ -113,14 +81,18 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         model = RecipeIngredient
         fields = ('id', 'name', 'measurement_unit', 'amount')
 
+# Сериализаторы Ингредиент-Рецепт Создание
+class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
+    id = serializers.PrimaryKeyRelatedField(
+        source='ingredient',
+        queryset=Ingredient.objects.all()
+    )
 
-#
-#
-# Сериализаторы Рецепта
-#
-#
+    class Meta:
+        model = RecipeIngredient
+        fields = ('id', 'amount')
 
-# Чтение
+# Сериализаторы Рецепта коротко Чтение
 class RecipeShortSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -131,6 +103,7 @@ class RecipeShortSerializer(serializers.ModelSerializer):
             'cooking_time'
         )
 
+# Сериализаторы Рецепта Чтение
 class RecipeSerializer(serializers.ModelSerializer):
     author = CustomUserSerializer()
     tags = TagSerializer(many=True)
@@ -171,19 +144,39 @@ class RecipeSerializer(serializers.ModelSerializer):
             user=request.user, recipe=obj
         ).exists()
 
-# Создание
+# Сериализаторы Рецепта Создание
 class RecipeCreateSerializer(serializers.ModelSerializer):
+    ingredients = RecipeIngredientCreateSerializer(many=True)
 
     class Meta:
         model = Recipe
-        fields = ('name', 'cooking_time', 'text', 'tags')
+        fields = ('name', 'cooking_time', 'text', 'tags', 'ingredients')
+        
+    def to_representation(self, instance):
+        """Метод представления модели"""
 
+        serializer = RecipeSerializer(
+            instance,
+            context={
+                'request': self.context.get('request')
+            }
+        )
+        return serializer.data
+    
+    def create(self, validated_data):
+        ingredients = validated_data.pop('ingredients')
+        instance = super().create(validated_data)
 
-#
-#
-# Сериализаторы Подписок
-#
-#
+        for ingredient_data in ingredients:
+            RecipeIngredient(
+                recipe=instance,
+                ingredient=ingredient_data['ingredient'],
+                amount=ingredient_data['amount']
+            ).save()
+
+        return instance
+
+# Сериализаторы Подписок Создание
 class SubscriptionSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Подписок."""
 
@@ -205,7 +198,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
                 'Нельзя подписаться на самого себя!')
         return data
 
-
+# Сериализаторы Подписок Чтение
 class SubscriptionShowSerializer(CustomUserSerializer):
     """Список подписок."""
 
