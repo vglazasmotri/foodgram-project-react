@@ -12,6 +12,13 @@ class CartSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cart
         fields = '__all__'
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Cart.objects.all(),
+                fields=('user', 'recipe'),
+                message='Рецепт уже в списоке покупок.'
+            )
+        ]
 
 # Сериализаторы Избранное
 class FavoriteSerializer(serializers.ModelSerializer):
@@ -153,8 +160,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         fields = ('name', 'cooking_time', 'text', 'tags', 'ingredients')
         
     def to_representation(self, instance):
-        """Метод представления модели"""
-
         serializer = RecipeSerializer(
             instance,
             context={
@@ -163,17 +168,41 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         )
         return serializer.data
     
+    @staticmethod
+    def add_ingredients(ingredients, instance):
+        """Добавляет ингредиенты."""
+        RecipeIngredient.objects.bulk_create([
+            RecipeIngredient(
+                ingredient=ingredient_data['ingredient'],
+                recipe=instance,
+                amount=ingredient_data['amount']
+            )
+            for ingredient_data in ingredients
+        ])
+
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
         instance = super().create(validated_data)
+        self.add_ingredients(ingredients, instance)
+        return instance
 
-        for ingredient_data in ingredients:
-            RecipeIngredient(
-                recipe=instance,
-                ingredient=ingredient_data['ingredient'],
-                amount=ingredient_data['amount']
-            ).save()
+    def update(self, instance, validated_data):
 
+        instance.name = validated_data.get('name', instance.name)
+        instance.text = validated_data.get('text', instance.text)
+        # instance.image = validated_data.get('image', instance.image)
+        instance.cooking_time = validated_data.get(
+            'cooking_time',
+            instance.cooking_time
+        )
+        instance.tags.clear()
+        instance.ingredients.clear()
+        ingredients = validated_data.pop('ingredients')
+        tags = validated_data.pop('tags')
+        instance.tags.add(*tags)
+        recipe = instance
+        self.add_ingredients(ingredients, recipe)
+        instance.save()
         return instance
 
 # Сериализаторы Подписок Создание

@@ -1,4 +1,5 @@
 from django.shortcuts import render, HttpResponse, get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
 from rest_framework import permissions, status
 from djoser.views import UserViewSet
@@ -7,14 +8,17 @@ from rest_framework.decorators import action
 
 from rest_framework.pagination import PageNumberPagination
 
-from recipes.models import Tag, Recipe, Ingredient, Follow, Favorite
+from recipes.models import Tag, Recipe, Ingredient, Follow, Favorite, Cart
 from api.serializers import (
     IngredientSerializer, TagSerializer, RecipeSerializer,
     CustomUserSerializer, SubscriptionSerializer, SubscriptionShowSerializer,
     FavoriteSerializer, RecipeShortSerializer, RecipeCreateSerializer,
+    CartSerializer,
     )
 
 from users.models import User
+from .filters import IngredientFilter, RecipeFilter
+
 
 def index(request):
     return HttpResponse('index')
@@ -71,6 +75,9 @@ class CustomUserViewSet(UserViewSet):
 class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    filter_backends = (DjangoFilterBackend, )
+    filterset_class = IngredientFilter
+    search_fields = ('^name', )
     pagination_class = None
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -81,6 +88,8 @@ class TagViewSet(ReadOnlyModelViewSet):
 class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RecipeFilter
 
     @action(
         detail=True,
@@ -108,6 +117,33 @@ class RecipeViewSet(ModelViewSet):
         favorite_recipe.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        url_path='shopping_cart',
+        url_name='shopping_cart',
+        permission_classes=(permissions.IsAuthenticated,)
+    )
+    def get_shopping_cart(self, request, pk):
+        """Позволяет текущему пользователю добавлять рецепты
+        в список покупок."""
+        recipe = get_object_or_404(Recipe, pk=pk)
+        if request.method == 'POST':
+            serializer = CartSerializer(
+                data={'user': request.user.id, 'recipe': recipe.id}
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            shopping_cart_serializer = RecipeShortSerializer(recipe)
+            return Response(
+                shopping_cart_serializer.data, status=status.HTTP_201_CREATED
+            )
+        shopping_cart_recipe = get_object_or_404(
+            Cart, user=request.user, recipe=recipe
+        )
+        shopping_cart_recipe.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     def get_queryset(self):
         recipes = Recipe.objects.prefetch_related(
             'recipeingredient_set__ingredient', 'tags'
@@ -115,10 +151,9 @@ class RecipeViewSet(ModelViewSet):
         return recipes
 
     def get_serializer_class(self):
-        # Добавить для других типов запросов
-        if self.action == 'create':
-            return RecipeCreateSerializer
-        return RecipeSerializer
-    
+        if self.request.method == 'GET':
+            return RecipeSerializer
+        return RecipeCreateSerializer
+
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
