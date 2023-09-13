@@ -18,7 +18,7 @@ from api.serializers import (
 
 from users.models import User
 from .filters import IngredientFilter, RecipeFilter
-
+from .permissions import AuthorOrReadOnly
 
 def index(request):
     return HttpResponse('index')
@@ -26,6 +26,7 @@ def index(request):
 class CustomUserViewSet(UserViewSet):
     queryset = User.objects.all()
     serializer_class = CustomUserSerializer
+    permission_classes = (AuthorOrReadOnly,)
 
     @action(
         detail=True,
