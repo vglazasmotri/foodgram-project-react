@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
+from drf_extra_fields.fields import Base64ImageField
 from recipes.models import Tag, Recipe, RecipeIngredient, Follow, Favorite, Cart, Ingredient
 from users.models import User
 from djoser.serializers import UserCreateSerializer, UserSerializer
@@ -107,6 +108,7 @@ class RecipeShortSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'name',
+            'image',
             'cooking_time'
         )
 
@@ -123,8 +125,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = ('id', 'tags', 'author', 'ingredients',
                   'is_favorited', 'is_in_shopping_cart',
-                  'name', 'text', 'cooking_time'
-                  )
+                  'name', 'image', 'text', 'cooking_time')
 
     def get_is_favorited(self, obj):
         """
@@ -154,10 +155,11 @@ class RecipeSerializer(serializers.ModelSerializer):
 # Сериализаторы Рецепта Создание
 class RecipeCreateSerializer(serializers.ModelSerializer):
     ingredients = RecipeIngredientCreateSerializer(many=True)
+    image = Base64ImageField(use_url=True, max_length=None)
 
     class Meta:
         model = Recipe
-        fields = ('name', 'cooking_time', 'text', 'tags', 'ingredients')
+        fields = ('name', 'image', 'cooking_time', 'text', 'tags', 'ingredients')
         
     def to_representation(self, instance):
         serializer = RecipeSerializer(
@@ -189,8 +191,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
 
         instance.name = validated_data.get('name', instance.name)
+        instance.image = validated_data.get('image', instance.image)
         instance.text = validated_data.get('text', instance.text)
-        # instance.image = validated_data.get('image', instance.image)
         instance.cooking_time = validated_data.get(
             'cooking_time',
             instance.cooking_time

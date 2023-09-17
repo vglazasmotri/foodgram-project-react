@@ -15,6 +15,9 @@ class Tag(models.Model):
 
 class Recipe(models.Model):
     name = models.CharField(max_length=200)
+    image = models.ImageField(
+        verbose_name='Изображение рецепта',
+        upload_to='recipes/')
     cooking_time = models.PositiveIntegerField()
     text = models.TextField()
     author = models.ForeignKey(
