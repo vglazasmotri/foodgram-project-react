@@ -1,3 +1,4 @@
+from django.db.models import Sum
 from django.shortcuts import render, HttpResponse, get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
@@ -8,7 +9,9 @@ from rest_framework.decorators import action
 
 from rest_framework.pagination import PageNumberPagination
 
-from recipes.models import Tag, Recipe, Ingredient, Follow, Favorite, Cart
+from recipes.models import(
+    Tag, Recipe, Ingredient, Follow, Favorite, Cart, RecipeIngredient,
+)
 from api.serializers import (
     IngredientSerializer, TagSerializer, RecipeSerializer,
     CustomUserSerializer, SubscriptionSerializer, SubscriptionShowSerializer,
@@ -19,6 +22,9 @@ from api.serializers import (
 from users.models import User
 from .filters import IngredientFilter, RecipeFilter
 from .permissions import AuthorOrReadOnly
+
+import csv
+
 
 def index(request):
     return HttpResponse('index')
@@ -161,3 +167,39 @@ class RecipeViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+    @staticmethod
+    def ingredients_to_csv(ingredients):
+        """Сохряняем список ингредиентов в выходной файл CSV."""
+        response = HttpResponse(
+            content_type="text/csv",
+            headers={"Content-Disposition": 'attachment; filename="cart.csv"'},
+        )
+        response.write(u'\ufeff'.encode('utf8'))
+        writer = csv.writer(response)
+        writer.writerow(["Ингредиент", "ед.изм.", "количество"])
+        for ingredient in ingredients:
+            writer.writerow(ingredient[key] for key in ingredient)
+        return response
+
+
+    @action(
+        detail=False,
+        methods=('get',),
+        permission_classes=(permissions.IsAuthenticated,),
+        url_path='download_shopping_cart',
+        url_name='download_shopping_cart',
+    )
+    def download_shopping_cart(self, request):
+        """
+        Получаем ингредиенты и корзины и суммируем количество повторяющтхся.
+        """
+
+        ingredients = RecipeIngredient.objects.filter(
+            recipe__shopping_recipe__user=request.user
+        ).values(
+            'ingredient__name',
+            'ingredient__measurement_unit'
+        ).annotate(ingredient_amount_sum=Sum('amount'))
+
+        return self.ingredients_to_csv(ingredients)

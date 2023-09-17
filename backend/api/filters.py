@@ -14,7 +14,7 @@ class IngredientFilter(filters.FilterSet):
 
 class RecipeFilter(filters.FilterSet):
     """Фильтр рецептов в избранном и списке покупок."""
-    author = filters.AllValuesMultipleFilter(field_name='author__id')
+
     tags = filters.AllValuesMultipleFilter(field_name='tags__slug')
     is_favorited = filters.BooleanFilter(method='get_is_favorited')
     is_in_shopping_cart = filters.BooleanFilter(
