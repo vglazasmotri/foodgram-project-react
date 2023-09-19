@@ -5,15 +5,21 @@ User = get_user_model()
 
 
 class Tag(models.Model):
+    """Тег."""
     name = models.CharField(max_length=200)
     color = models.CharField(max_length=7)
     slug = models.SlugField(max_length=200, unique=True)
 
     def __str__(self):
         return self.name
+    
+    class Meta:
+        verbose_name = 'Тег'
+        verbose_name_plural = 'Теги'
 
 
 class Recipe(models.Model):
+    """Рецепт."""
     name = models.CharField(max_length=200)
     image = models.ImageField(
         verbose_name='Изображение рецепта',
@@ -31,21 +37,35 @@ class Recipe(models.Model):
         'Ingredient',
         through='RecipeIngredient',
         through_fields=('recipe', 'ingredient'))
+    pub_date = models.DateTimeField(
+        verbose_name='Дата публикации', auto_now_add=True, db_index=True
+    )
+
+    class Meta:
+        verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
+        ordering = ['-pub_date']
 
 
 class Ingredient(models.Model):
+    """Ингредиент."""
     name = models.CharField(max_length=200)
     measurement_unit = models.CharField(max_length=200)
 
+    class Meta:
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
+
 
 class RecipeIngredient(models.Model):
+    """Колличество ингредиента в рецепте."""
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     amount = models.PositiveIntegerField()
 
 
 class Follow(models.Model):
-    """Подписка"""
+    """Подписка."""
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -58,8 +78,9 @@ class Follow(models.Model):
     )
 
     class Meta:
+        verbose_name = 'Подписка на автора'
+        verbose_name_plural = 'Подписки на авторов'
         ordering = ['-author']
-        verbose_name = 'Подписки на авторов'
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'author'], name='unique_follow'
@@ -103,8 +124,7 @@ class Cart(models.Model):
 
 
 class Favorite(models.Model):
-    """Избранное"""
-
+    """Избранное."""
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
