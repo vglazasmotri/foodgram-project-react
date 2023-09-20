@@ -6,6 +6,7 @@ from .validators import validate_username
 
 
 class User(AbstractUser):
+    """Модель кастомного пользователя."""
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 

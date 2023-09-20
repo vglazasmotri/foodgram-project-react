@@ -1,15 +1,16 @@
+import csv
+
 from django.db.models import Sum
-from django.shortcuts import render, HttpResponse, get_object_or_404
+from django.shortcuts import HttpResponse, get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
 from rest_framework import permissions, status
-from djoser.views import UserViewSet
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.decorators import action
-
 from rest_framework.pagination import PageNumberPagination
+from djoser.views import UserViewSet
 
-from recipes.models import(
+from recipes.models import (
     Tag, Recipe, Ingredient, Follow, Favorite, Cart, RecipeIngredient,
 )
 from api.serializers import (
@@ -18,18 +19,13 @@ from api.serializers import (
     FavoriteSerializer, RecipeShortSerializer, RecipeCreateSerializer,
     CartSerializer,
     )
-
 from users.models import User
 from .filters import IngredientFilter, RecipeFilter
 from .permissions import AuthorOrReadOnly
 
-import csv
-
-
-def index(request):
-    return HttpResponse('index')
 
 class CustomUserViewSet(UserViewSet):
+    """Вьюсет для работы с обьектами класса User и подписок."""
     queryset = User.objects.all()
     serializer_class = CustomUserSerializer
     permission_classes = (AuthorOrReadOnly,)
@@ -40,8 +36,8 @@ class CustomUserViewSet(UserViewSet):
         url_path='subscribe',
         url_name='subscribe',
     )
-    def get_subscribe(self, request, id):
-        """Подписаться и отписываться от авторарецепта."""
+    def subscribe(self, request, id):
+        """Подписаться и отписываться от автора рецепта."""
         author = get_object_or_404(User, id=id)
         if request.method == 'POST':
             serializer = SubscriptionSerializer(
@@ -60,7 +56,7 @@ class CustomUserViewSet(UserViewSet):
         )
         subscription.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
+
     @action(
         detail=False,
         methods=['get'],
@@ -78,8 +74,10 @@ class CustomUserViewSet(UserViewSet):
             result_pages, context={'request': request}, many=True
         )
         return paginator.get_paginated_response(serializer.data)
-    
+
+
 class IngredientViewSet(ReadOnlyModelViewSet):
+    """Вьюсет для работы с обьектами класса Ingredient."""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (permissions.AllowAny,)
@@ -88,13 +86,17 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     search_fields = ('^name', )
     pagination_class = None
 
+
 class TagViewSet(ReadOnlyModelViewSet):
+    """Вьюсет для работы с обьектами класса Tag."""
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     pagination_class = None
     permission_classes = (permissions.AllowAny,)
 
+
 class RecipeViewSet(ModelViewSet):
+    """Вьюсет для работы с обьектами класса Recipe."""
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = (AuthorOrReadOnly,)
@@ -155,17 +157,20 @@ class RecipeViewSet(ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def get_queryset(self):
+        """Переопределяем метод для оптимизации запросов к бд."""
         recipes = Recipe.objects.prefetch_related(
             'recipeingredient_set__ingredient', 'tags'
         ).all()
         return recipes
 
     def get_serializer_class(self):
+        """Метод выбора сериализатора для рецептов."""
         if self.request.method == 'GET':
             return RecipeSerializer
         return RecipeCreateSerializer
 
     def perform_create(self, serializer):
+        """Добаляет данные перед вызовом save."""
         serializer.save(author=self.request.user)
 
     @staticmethod
@@ -182,7 +187,6 @@ class RecipeViewSet(ModelViewSet):
             writer.writerow(ingredient[key] for key in ingredient)
         return response
 
-
     @action(
         detail=False,
         methods=('get',),
@@ -192,9 +196,8 @@ class RecipeViewSet(ModelViewSet):
     )
     def download_shopping_cart(self, request):
         """
-        Получаем ингредиенты и корзины и суммируем количество повторяющтхся.
+        Получает ингредиенты из корзины и суммирует количество повторяющтхся.
         """
-
         ingredients = RecipeIngredient.objects.filter(
             recipe__shopping_recipe__user=request.user
         ).values(

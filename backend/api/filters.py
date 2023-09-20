@@ -1,5 +1,4 @@
 from django_filters import rest_framework as filters
-# from rest_framework import filters
 from recipes.models import Ingredient, Recipe
 
 
@@ -9,18 +8,16 @@ class IngredientFilter(filters.FilterSet):
 
     class Meta:
         model = Ingredient
-        fields = ('name', )
+        fields = ('name',)
 
 
 class RecipeFilter(filters.FilterSet):
     """Фильтр рецептов в избранном и списке покупок."""
-
     tags = filters.AllValuesMultipleFilter(field_name='tags__slug')
     is_favorited = filters.BooleanFilter(method='get_is_favorited')
     is_in_shopping_cart = filters.BooleanFilter(
-        method='get_is_in_shopping_cart'
+        method='get_is_in_shopping_cart',
     )
-    
 
     class Meta:
         model = Recipe

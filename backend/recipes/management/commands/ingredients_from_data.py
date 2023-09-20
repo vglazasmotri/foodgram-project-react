@@ -13,7 +13,8 @@ class Command(BaseCommand):
             return
         try:
             with open(
-                f'./data/ingredients.csv', encoding='utf-8'
+                './data/ingredients.csv',
+                encoding='utf-8',
             ) as file:
                 reader = csv.reader(file)
                 next(reader)
