@@ -75,16 +75,38 @@ class CustomUserViewSet(UserViewSet):
         )
         return paginator.get_paginated_response(serializer.data)
 
+    @action(
+        detail=False,
+        methods=['get', 'patch'],
+        url_path='me',
+        url_name='me',
+        permission_classes=(permissions.IsAuthenticated,)
+    )
+    def get_me(self, request):
+        """Получение и редактирование информации о текущем пользователе."""
+        if request.method == 'PATCH':
+            serializer = CustomUserSerializer(
+                request.user, data=request.data,
+                partial=True, context={'request': request}
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = CustomUserSerializer(
+            request.user, context={'request': request}
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class IngredientViewSet(ReadOnlyModelViewSet):
     """Вьюсет для работы с обьектами класса Ingredient."""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    pagination_class = None
     permission_classes = (permissions.AllowAny,)
     filterset_class = IngredientFilter
     filter_backends = (DjangoFilterBackend, )
     search_fields = ('^name', )
-    pagination_class = None
 
 
 class TagViewSet(ReadOnlyModelViewSet):
