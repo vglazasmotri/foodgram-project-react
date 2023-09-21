@@ -18,7 +18,7 @@ from api.serializers import (
     CustomUserSerializer, SubscriptionSerializer, SubscriptionShowSerializer,
     FavoriteSerializer, RecipeShortSerializer, RecipeCreateSerializer,
     CartSerializer,
-    )
+)
 from users.models import User
 from .filters import IngredientFilter, RecipeFilter
 from .permissions import AuthorOrReadOnly
