@@ -166,8 +166,9 @@ sudo docker compose -f docker-compose.production.yml exec backend python manage.
 
 ## Импортируйте и список ингредиентов в бд
 
+
 ```
-sudo docker compose -f docker-compose.production.yml exec backend python manage.py ingredients_from_data
+sudo docker compose -f docker-compose.production.yml exec backend python manage.py ingredients_from_data ingredients.csv
 ```
 
 ## На сервере в редакторе nano откройте конфиг Nginx:

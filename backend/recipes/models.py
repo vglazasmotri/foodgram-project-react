@@ -2,14 +2,16 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 
+from .constans import MAX_LENGTH_NAME, MAX_LENGTH_COLOR, MIN_VALUE
+
 User = get_user_model()
 
 
 class Tag(models.Model):
     """Тег."""
-    name = models.CharField(max_length=200, unique=True)
-    color = models.CharField(max_length=7, unique=True)
-    slug = models.SlugField(max_length=200, unique=True)
+    name = models.CharField(max_length=MAX_LENGTH_NAME, unique=True)
+    color = models.CharField(max_length=MAX_LENGTH_COLOR, unique=True)
+    slug = models.SlugField(max_length=MAX_LENGTH_NAME, unique=True)
 
     def __str__(self):
         return self.name
@@ -21,15 +23,15 @@ class Tag(models.Model):
 
 class Recipe(models.Model):
     """Рецепт."""
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=MAX_LENGTH_NAME)
     tags = models.ManyToManyField(Tag)
     text = models.TextField()
     cooking_time = models.PositiveIntegerField(
         verbose_name='Время приготовления (минут)',
         validators=[
             MinValueValidator(
-                1,
-                message='Не может быть меньше 1.'
+                MIN_VALUE,
+                message=f'Не может быть меньше {MIN_VALUE}.'
             ),
         ],
     )
@@ -65,8 +67,8 @@ class Recipe(models.Model):
 
 class Ingredient(models.Model):
     """Ингредиент."""
-    name = models.CharField(max_length=200)
-    measurement_unit = models.CharField(max_length=200)
+    name = models.CharField(max_length=MAX_LENGTH_NAME)
+    measurement_unit = models.CharField(max_length=MAX_LENGTH_NAME)
 
     class Meta:
         verbose_name = 'Ингредиент'
@@ -84,8 +86,8 @@ class RecipeIngredient(models.Model):
         verbose_name='Колличество ингредиента в рецепте.',
         validators=[
             MinValueValidator(
-                1,
-                message='Не может быть меньше 1.'
+                MIN_VALUE,
+                message=f'Не может быть меньше {MIN_VALUE}.'
             ),
         ],
     )

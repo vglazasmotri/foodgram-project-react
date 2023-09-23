@@ -3,6 +3,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 
 from .validators import validate_username
+from .constans import MAX_LENGTH_NAME, MAX_LENGTH_EMAIL
 
 
 class User(AbstractUser):
@@ -12,22 +13,22 @@ class User(AbstractUser):
 
     username = models.CharField(
         'Уникальный юзернейм',
-        max_length=150,
+        max_length=MAX_LENGTH_NAME,
         unique=True,
         validators=(validate_username, UnicodeUsernameValidator()),
     )
     email = models.EmailField(
         'Адрес электронной почты',
         unique=True,
-        max_length=254,
+        max_length=MAX_LENGTH_EMAIL,
     )
     first_name = models.CharField(
         'Имя',
-        max_length=150,
+        max_length=MAX_LENGTH_NAME,
     )
     last_name = models.CharField(
         'Фамилия',
-        max_length=150,
+        max_length=MAX_LENGTH_NAME,
     )
 
     class Meta:

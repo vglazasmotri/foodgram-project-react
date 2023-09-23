@@ -1,32 +1,40 @@
 import csv
+import sys
 
 from django.core.management.base import BaseCommand
+
+from foodgram_backend.settings import DATA_ROOT
 from recipes.models import Ingredient
 
 
 class Command(BaseCommand):
     help = 'Загрузка ингредиентов из csv файла в базу данных.'
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            'path_file',
+            type=str,
+            help='Указывает путь к файлу с фикстурами.',
+        )
+
     def handle(self, *args, **kwargs):
-        if Ingredient.objects.exists():
-            print("Данные уже существуют в бд!")
-            return
+        path_file = kwargs['path_file']
         try:
             with open(
-                './data/ingredients.csv',
+                f'{DATA_ROOT}/{path_file}',
                 encoding='utf-8',
             ) as file:
                 reader = csv.reader(file)
                 next(reader)
                 ingredients = [
                     Ingredient(
-                        name=row[0],
-                        measurement_unit=row[1],
+                        name=extracted_name,
+                        measurement_unit=extracted_unit,
                     )
-                    for row in reader
+                    for extracted_name, extracted_unit in reader
                 ]
                 Ingredient.objects.bulk_create(ingredients)
-        except Exception:
-            print("Данные загрузьть не удалось!")
+        except ValueError:
+            sys.stdout.write("Ошибка! Неверный тип данных!")
         else:
-            print("Данные загружены!")
+            sys.stdout.write("Данные загружены!")
