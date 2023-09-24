@@ -148,6 +148,10 @@ sudo docker compose -f docker-compose.production.yml up -d
 ## Выполните миграции, соберите статические файлы бэкенда и скопируйте их в /backend_static/:
 
 ```
+sudo docker compose -f docker-compose.production.yml exec backend python manage.py makemigrations
+```
+
+```
 sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
 ```
 

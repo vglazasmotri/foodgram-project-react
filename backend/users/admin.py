@@ -1,7 +1,7 @@
 from django.contrib.admin import register
 from django.contrib.auth.admin import UserAdmin
 
-from .models import User
+from users.models import User
 
 
 @register(User)

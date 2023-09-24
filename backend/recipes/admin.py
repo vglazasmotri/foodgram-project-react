@@ -3,7 +3,7 @@ from django.contrib import admin
 from recipes.models import (
     Tag, Recipe, Ingredient, RecipeIngredient, Cart, Follow, Favorite,
 )
-from .constans import MIN_VALUE
+from recipes.constans import MIN_VALUE
 
 
 class RecipeIngredientInline(admin.TabularInline):
