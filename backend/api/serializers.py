@@ -7,6 +7,7 @@ from recipes.models import (
     Tag, Recipe, RecipeIngredient, Follow, Favorite, Cart, Ingredient,
 )
 from users.models import User
+from api.constans import MIN_VALUE
 
 
 class CartSerializer(serializers.ModelSerializer):
@@ -210,14 +211,14 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                 'Ингредиенты в рецепте не должны повторятся.'
             )
         for ingredient in ingredients:
-            if int(ingredient.get('amount')) < 1:
+            if int(ingredient.get('amount')) < MIN_VALUE:
                 raise serializers.ValidationError(
                     'Количество ингредиента не может быть меньше 1.'
                 )
         return ingredients
 
     def create(self, validated_data):
-        """ОСоздание рецепта."""
+        """Создание рецепта."""
         ingredients = validated_data.pop('ingredients')
         instance = super().create(validated_data)
         self.add_ingredients(ingredients, instance)

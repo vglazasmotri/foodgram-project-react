@@ -13,15 +13,15 @@ from rest_framework.response import Response
 from recipes.models import (
     Tag, Recipe, Ingredient, Follow, Favorite, Cart, RecipeIngredient,
 )
+from users.models import User
+from api.filters import IngredientFilter, RecipeFilter
+from api.permissions import AuthorOrReadOnly
 from api.serializers import (
     IngredientSerializer, TagSerializer, RecipeSerializer,
     CustomUserSerializer, SubscriptionSerializer, SubscriptionShowSerializer,
     FavoriteSerializer, RecipeShortSerializer, RecipeCreateSerializer,
     CartSerializer,
 )
-from users.models import User
-from .filters import IngredientFilter, RecipeFilter
-from .permissions import AuthorOrReadOnly
 
 
 class CustomUserViewSet(UserViewSet):
@@ -36,7 +36,7 @@ class CustomUserViewSet(UserViewSet):
         url_path='subscribe',
         url_name='subscribe',
     )
-    def subscribe(self, request, id):
+    def add_or_delete_subscription(self, request, id):
         """Подписаться и отписываться от автора рецепта."""
         author = get_object_or_404(User, id=id)
         if request.method == 'POST':
@@ -132,7 +132,7 @@ class RecipeViewSet(ModelViewSet):
         url_name='favorite',
         permission_classes=(permissions.IsAuthenticated,)
     )
-    def get_favorite(self, request, pk):
+    def add_or_delete_favorite(self, request, pk):
         """Позволяет текущему пользователю добавлять рецепты в избранное."""
         recipe = get_object_or_404(Recipe, pk=pk)
         if request.method == 'POST':
@@ -158,7 +158,7 @@ class RecipeViewSet(ModelViewSet):
         url_name='shopping_cart',
         permission_classes=(permissions.IsAuthenticated,)
     )
-    def get_shopping_cart(self, request, pk):
+    def add_or_deletet_shopping_cart(self, request, pk):
         """Позволяет текущему пользователю добавлять рецепты
         в список покупок."""
         recipe = get_object_or_404(Recipe, pk=pk)
