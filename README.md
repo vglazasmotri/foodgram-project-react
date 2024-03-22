@@ -1,23 +1,22 @@
-# Foodgram - Продуктовый помощник
-Запуск проекта Foodgram локально и на удалённом сервере.
+<h1 align=center>🌟Проект Foodgram - Продуктовый помощник🌟</h1>
 
-## Стэк
+## 📄 **Описание**
 
-![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![DjangoREST](https://img.shields.io/badge/DJANGO-REST-ff1709?style=for-the-badge&logo=django&logoColor=white&color=ff1709&labelColor=blue) ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E) ![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB) ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white) ![Gunicorn](https://img.shields.io/badge/gunicorn-%298729.svg?style=for-the-badge&logo=gunicorn&logoColor=white) ![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)
-
-## Описание проекта 
-Foodgram - сервис для любителей вкусно готовить, который позволяет:
+Foodgram - вебсайт с рецептами, позволяет:
 
 - Создавать, просматривать, редактировать и удалять рецепты блюд.
 - Просматривать рецепты и добавлять, удалять их из списока избраных.
 - Добавлять, и удалять из корзины свои и чужие рецепты, и скачавать список продуктов необходимый для их приготовления.
 - Добавлять авторов в подписки и просматривать все рецепты автора на которого подписались.
+  
+<br>
+<br>
 
-
+## 🛠️ Инструкция по установке
 ___
-# Установка на локальный компьютер.
+### Установка на локальный компьютер.
 
-## Клонируйте репозиторий:
+Клонируйте репозиторий:
 
 ```
 git clone git@github.com:vglazasmotri/foodgram-project-react.git
@@ -27,7 +26,7 @@ git clone git@github.com:vglazasmotri/foodgram-project-react.git
 cd foodgram-project-react
 ```
 
-## Создайте файл .env и заполните его своими данными. Пример в файле .env.example:
+Создайте файл .env и заполните его своими данными. Пример в файле .env.example:
 
 ```
 # Переменные для базы данных:
@@ -48,20 +47,20 @@ DOCKER_USERNAME=dockerhub_username
 APPLICATION_NAME=foodgram
 ```
 
-## Установить пакет Make:
+Установить пакет Make:
 
-### Если у вас Windows.
+Если у вас Windows.
 - Установите chocolatey package manager
 - Установите make:
 ```
 choco install make
 ```
-### Если у вас Linux то make должна быть установлена по умолчанию. На всякий случай:
+Если у вас Linux то make должна быть установлена по умолчанию. На всякий случай:
 ```
 sudo apt install make
 ```
 
-## Создание Docker-образов и загрузка на ваш DockerHub с помощью Makefile:
+Создание Docker-образов и загрузка на ваш DockerHub с помощью Makefile:
 
 ```
 cd frontend
@@ -73,14 +72,14 @@ cd ../backend
 make build push
 ```
 
-## Запуск проекта на локальном компьютере:
+Запуск проекта на локальном компьютере:
 
 ```
 cd ../infra
 docker compose -f docker-compose.production.yml up
 ```
 
-### Соберите статику, скопируйте файлы и выполните команду migrate в Windows лучше через PowerShell:
+Соберите статику, скопируйте файлы и выполните команду migrate в Windows лучше через PowerShell:
 
 ```
 docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic
@@ -96,28 +95,28 @@ docker compose -f docker-compose.production.yml exec backend python manage.py ma
 docker compose -f docker-compose.production.yml exec backend python manage.py migrate
 ```
 
-### Проект доступер локально
+Проект доступер локально
 
 ```
 http://localhost:8000/
 ```
 
 ___
-# Деплой на сервер.
+### Деплой на сервер.
 
-## Подключитесь к удаленному серверу
+Подключитесь к удаленному серверу
 
 ```
 ssh -i путь_до_файла_с_SSH_ключом/название_файла_с_SSH_ключом имя_пользователя@ip_адрес_сервера 
 ```
 
-## Создайте на сервере директорию foodgram через терминал:
+Создайте на сервере директорию foodgram через терминал:
 
 ```
 mkdir foodgram
 ```
 
-## Установка docker compose на сервер:
+Установка docker compose на сервер:
 
 ```
 sudo apt update
@@ -127,7 +126,7 @@ sudo sh ./get-docker.sh
 sudo apt-get install docker-compose-plugin
 ```
 
-## На сервере в директорию foodgram/ скопируйте файлы из локальной папки infra: docker-compose.production.yml, nginx.conf и .env:
+На сервере в директорию foodgram/ скопируйте файлы из локальной папки infra: docker-compose.production.yml, nginx.conf и .env:
 
 ```
 scp -i path_to_SSH/SSH_name docker-compose.production.yml username@server_ip:/home/username/foodgram/docker-compose.production.yml
@@ -139,13 +138,13 @@ scp -i path_to_SSH/SSH_name docker-compose.production.yml username@server_ip:/ho
 
 Или создайте аналогичные файлы с помощью редактора, например nano и скопруйте в них содержимое.
 
-## Запустите docker compose в режиме демона:
+Запустите docker compose в режиме демона:
 
 ```
 sudo docker compose -f docker-compose.production.yml up -d
 ```
 
-## Выполните миграции, соберите статические файлы бэкенда и скопируйте их в /backend_static/:
+Выполните миграции, соберите статические файлы бэкенда и скопируйте их в /backend_static/:
 
 ```
 sudo docker compose -f docker-compose.production.yml exec backend python manage.py makemigrations
@@ -163,25 +162,25 @@ sudo docker compose -f docker-compose.production.yml exec backend python manage.
 sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /backend_static/
 ```
 
-## Создайте суперпользователя
+Создайте суперпользователя
 ```
 sudo docker compose -f docker-compose.production.yml exec backend python manage.py createsuperuser
 ```
 
-## Импортируйте и список ингредиентов в бд
+Импортируйте и список ингредиентов в бд
 
 
 ```
 sudo docker compose -f docker-compose.production.yml exec backend python manage.py ingredients_from_data ingredients.csv
 ```
 
-## На сервере в редакторе nano откройте конфиг Nginx:
+На сервере в редакторе nano откройте конфиг Nginx:
 
 ```
 sudo nano /etc/nginx/sites-enabled/default
 ```
 
-## Измените настройки location в секции server:
+Измените настройки location в секции server:
 
 ```
 location / {
@@ -190,7 +189,7 @@ location / {
 }
 ```
 
-## Проверьте работоспособность конфига Nginx:
+Проверьте работоспособность конфига Nginx:
 
 ```
 sudo nginx -t
@@ -202,7 +201,7 @@ nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
 nginx: configuration file /etc/nginx/nginx.conf test is successful
 ```
 
-## Перезапускаем Nginx
+Перезапускаем Nginx
 
 ```
 sudo service nginx reload
@@ -210,23 +209,22 @@ sudo service nginx reload
 
 Готово!
 
-## Доступы
 
-Адрес сайта:
-```
-https://qebi.ru/
-```
-Администратор:
-```
-admin@admin.ru
-Qwerty123Qwerty123
+<br>
+<br>
 
-```
-Тестовый пользователь:
-```
-Test@test.ru
-Qwerty123Qwerty123
-```
-___
-# Автор
-[Sergey Sych](https://github.com/vglazasmotri)
+## 🎞️ Примеры
+
+[Дэмо проекта](http://foodgramm.ru/recipes)
+
+## 🛠️ Применяемые технологии:
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![DjangoREST](https://img.shields.io/badge/DJANGO-REST-ff1709?style=for-the-badge&logo=django&logoColor=white&color=ff1709&labelColor=blue) ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E) ![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB) ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white) ![Gunicorn](https://img.shields.io/badge/gunicorn-%298729.svg?style=for-the-badge&logo=gunicorn&logoColor=white) ![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)
+- Python 3.7
+- Django 3.2
+- Django Rest Framework 3.12.4
+
+
+## 💪 Автор:
+
+- Сергей Сыч 
+(https://github.com/vglazasmotri "Сергей Сыч (Python-разработчик)")
