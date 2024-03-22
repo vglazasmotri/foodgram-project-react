@@ -226,5 +226,4 @@ sudo service nginx reload
 
 ## 💪 Автор:
 
-- Сергей Сыч 
-(https://github.com/vglazasmotri "Сергей Сыч (Python-разработчик)")
+- Сергей Сыч Python-разработчик (https://github.com/vglazasmotri)
