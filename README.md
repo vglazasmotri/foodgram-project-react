@@ -211,7 +211,6 @@ sudo service nginx reload
 
 
 <br>
-<br>
 
 ## 🎞️ Примеры
 
